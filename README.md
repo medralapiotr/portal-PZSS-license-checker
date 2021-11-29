@@ -1,0 +1,1 @@
+# portal-PZSS-license-checker
