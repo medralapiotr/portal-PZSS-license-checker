@@ -11,10 +11,10 @@ from bs4 import BeautifulSoup
 
 ## User input to pass credentials and logins
 
-login = input("Please enter login to PZSS portal")
-password = input("Please enter password to PZSS portal")
-email = input("Please enter your email adress")
-emailpass = input("Please enter your email password")
+login = input("Please enter login to PZSS portal: ")
+password = input("Please enter password to PZSS portal: ")
+email = input("Please enter your email adress: ")
+email_pass = input("Please enter your email password: ")
 strona = 'https://portal.pzss.org.pl'
 strona_2 = "https://portal.pzss.org.pl/Player/Applications"
 
@@ -28,13 +28,14 @@ r2 = s.get(url=strona_2)
 p1 = BeautifulSoup(r2.text, 'lxml').prettify()
 p2 = pd.read_html(p1, header=0, index_col=None)[0]
 result_initial = p2.iat[0, 3]
-result_initial = result
+result = result_initial
 
-yag = yagmail.SMTP(email, emailpass)
+yag = yagmail.SMTP(email, email_pass)
+content = str(datetime.now())+": "+result
 yag.send(
     to=email,
     subject="Initial PZSS license status",
-    contents=(str(datetime.now())+": "result,
+    contents=content,
 )
 print(str(datetime.now())+" Initial PZSS license status: "+result)
 
@@ -52,11 +53,12 @@ while result_initial == result:
 
 ## Penultimate status is "Zatwierdzony przez WZSS  oczekiwanie na decyzję PZSS"
 ## when reaching penultimate status send email update, exit loop and enter final loop in search of final status change
-    if result ="Zatwierdzony przez WZSS  oczekiwanie na decyzję PZSS":
+    if result == "Zatwierdzony przez WZSS  oczekiwanie na decyzję PZSS":
+        content = str(datetime.now()) + ": " + result
         yag.send(
             to=email,
-            subject="New PZSS license status,
-        contents = (str(datetime.now()) + ": "result,
+            subject="New PZSS license status",
+            contents = content,
                     )
         print(str(datetime.now()) + " Current license status: " + result)
         time.sleep(300)
@@ -66,10 +68,11 @@ while result_initial == result:
 ## should there be a change with the status, send the email with new status and search for further status change
     if result_initial != result:
         result_initial = result
+        content = str(datetime.now()) + ": " + result
         yag.send(
             to=email,
             subject="New PZSS license status",
-        contents = (str(datetime.now()) + ": "result,
+            contents = content,
                     )
         continue
 
@@ -90,11 +93,11 @@ while result_initial == result:
     time.sleep(300)
 
 #After final status change on website code to send final email update and exit
-
+content = str(datetime.now())+": "+result
 yag.send(
     to=email,
     subject="New PZSS license status",
-    contents=(str(datetime.now()) + ": "result,
+    contents=content,
               )
 
 print(str(datetime.now()) + " Current license status: " + result)
